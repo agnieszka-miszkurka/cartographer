@@ -1,5 +1,5 @@
 module.exports = (agent) => {
-  console.log('anser no');
+  console.log('answer no');
   agent.add('answer no');
 
   agent.setFollowupEvent('QUERY');
