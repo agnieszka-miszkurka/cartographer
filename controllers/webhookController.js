@@ -16,7 +16,7 @@ const webhookController = (req, res) => {
   intentMap.set('AnswerYes', answerYes);
   intentMap.set('AnswerNo', answerNo);
 
-  return agent.handleRequest(intentMap);
+  agent.handleRequest(intentMap);
 };
 
 module.exports = webhookController;
