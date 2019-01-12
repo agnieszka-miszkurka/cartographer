@@ -12,4 +12,5 @@ app.post('/webhook', webhookController);
 
 app.get('/health', health);
 
+// eslint-disable-next-line no-console
 app.listen(port, () => console.log('Server running on port 3000'));
