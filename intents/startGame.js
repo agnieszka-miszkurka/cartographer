@@ -4,7 +4,10 @@ module.exports = (agent) => {
   agent.context.set({
     name: 'question-index',
     lifespan: 30,
-    parameters: { questions: [] },
+    parameters: {
+      questions: [],
+      questionNumber: 1,
+    },
   });
 
   agent.setFollowupEvent('QUERY');
