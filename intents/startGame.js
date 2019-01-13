@@ -5,6 +5,7 @@ module.exports = (agent) => {
     name: 'questioning',
     lifespan: 30,
     parameters: {
+      lastQuestion: false,
       answers: [],
       questions: [],
       questionNumber: 1,

@@ -28,14 +28,14 @@ const getQuestionText = async (questionNumber, questions, answers) => {
           select distinct(id), name, neighbors
           from (
             SELECT id, name, unnest(types) "type", neighbors
-              FROM points_krk p
+              FROM points p
           ) y
           ${where}
         )
         select
           unnest(neighbors) as t,
           count(*),
-          (select count(*) as c from points) as c
+          (select count(*) as c from x) as c
         from x
         group by t
         order by 2 desc
@@ -48,22 +48,44 @@ const getQuestionText = async (questionNumber, questions, answers) => {
     const middlePoint = response.rows[0].c / 2
 
 
+    const response2 = await client.query(`select count(*) from points ${where};`);
 
+    const countOfAll = response2.rows[0].count
 
+    console.log('!!!!!!', countOfAll, ',', questionNumber)
 
     let questionRow
+    let prevQuestionRow = response.rows[0]
 
-    for (const row of response.rows) {
-      questionRow = row
+    let lastQuestion = false;
 
-      if (row.count < middlePoint) {
-        break
+    if (countOfAll < 10) {
+      lastQuestion = true;
+      const response3 = await client.query(`select * from points ${where};`);
+
+      questionRow = {
+        t: `Is your answer one of these? ${JSON.stringify(response3.rows.filter(({name}) => name != null && name != 'null').map(({ name }) => name))}`
+      }
+    } else {
+      for (const row of response.rows) {
+        questionRow = row
+
+        if (row.count < middlePoint) {
+          break
+        }
+
+        prevQuestionRow = row
+      }
+
+      if (Math.abs(prevQuestionRow.count - middlePoint) < Math.abs(questionRow.count - middlePoint)) {
+        questionRow = prevQuestionRow;
       }
     }
 
     console.log(questionRow)
 
     return {
+      lastQuestion,
       question: questionRow.t,
       questions: [...questions, questionRow.t],
     }

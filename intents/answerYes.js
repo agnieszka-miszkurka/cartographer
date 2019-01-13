@@ -1,5 +1,5 @@
 module.exports = (agent) => {
-  const { parameters: { answers } } = agent.context.get('questioning');
+  const { parameters: { answers, lastQuestion } } = agent.context.get('questioning');
 
   agent.context.set({
     name: 'questioning',
@@ -10,6 +10,9 @@ module.exports = (agent) => {
   });
 
   agent.add('');
-
-  agent.setFollowupEvent('QUERY');
+  if (lastQuestion) {
+    agent.setFollowupEvent('GAME_OVER_YES');
+  } else {
+    agent.setFollowupEvent('QUERY');
+  }
 };
