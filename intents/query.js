@@ -1,4 +1,5 @@
 const { Payload } = require('dialogflow-fulfillment');
+const getQuestionText = require('../helpers/question');
 
 const getQuestionRead = (preface, question) => {
   const random = Math.floor(Math.random() * 4);
@@ -13,14 +14,11 @@ const getQuestionRead = (preface, question) => {
 </speak>`;
 };
 
-// TODO new question generation HERE
-const getQuestionText = questionNumber => `Is it question #${questionNumber}?`;
-
-module.exports = (agent) => {
+module.exports = async (agent) => {
   const { ACTIONS_ON_GOOGLE } = agent;
-  const { parameters: { questions, questionNumber } } = agent.context.get('questioning');
+  const { parameters: { questions, questionNumber, answers } } = agent.context.get('questioning');
 
-  const questionText = getQuestionText(questionNumber);
+  const { questions: newQuestions, question } = await getQuestionText(questionNumber, questions, answers);
 
   agent.add(
     new Payload(ACTIONS_ON_GOOGLE, {
@@ -30,8 +28,8 @@ module.exports = (agent) => {
           {
             simpleResponse: {
               textToSpeech: '',
-              displayText: (questionNumber === 1 ? 'Great! Let\'s begin! ' : ' ') + questionText,
-              ssml: getQuestionRead((questionNumber === 1 ? 'Great! Let\'s begin! ' : ' '), questionText),
+              displayText: (questionNumber === 1 ? 'Great! Let\'s begin! ' : ' ') + `Is there ${question} nearby?`,
+              ssml: getQuestionRead((questionNumber === 1 ? 'Great! Let\'s begin! ' : ' '), `Is there ${question} nearby?`),
             },
           },
         ],
@@ -51,7 +49,7 @@ module.exports = (agent) => {
     name: 'questioning',
     lifespan: 30,
     parameters: {
-      questions: [...questions, questionText],
+      questions: newQuestions,
       questionNumber: questionNumber + 1,
     },
   });
