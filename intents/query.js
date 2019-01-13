@@ -1,14 +1,20 @@
 const { Payload } = require('dialogflow-fulfillment');
 
-const getQuestionRead = question => `
+const getQuestionRead = (preface, question) => {
+  const random = Math.floor(Math.random() * 4);
+  console.log(random);
+
+  return `
 <speak>
+  ${preface}
   <audio src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"/>
   <break time="0.2s"/>
-  ${question}
+  <prosody pitch="-${random}st">${question}</prosody>
 </speak>`;
+};
 
 // TODO new question generation HERE
-const getQuestionText = questionNumber => `${questionNumber === 1 ? 'Great! Let\'s begin!' : ''} Is it question #${questionNumber}?`;
+const getQuestionText = questionNumber => `Is it question #${questionNumber}?`;
 
 module.exports = (agent) => {
   const { ACTIONS_ON_GOOGLE } = agent;
@@ -24,8 +30,8 @@ module.exports = (agent) => {
           {
             simpleResponse: {
               textToSpeech: '',
-              displayText: questionText,
-              ssml: getQuestionRead(questionText),
+              displayText: (questionNumber === 1 ? 'Great! Let\'s begin! ' : ' ') + questionText,
+              ssml: getQuestionRead((questionNumber === 1 ? 'Great! Let\'s begin! ' : ' '), questionText),
             },
           },
         ],
