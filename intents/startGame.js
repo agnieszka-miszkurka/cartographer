@@ -2,7 +2,7 @@ module.exports = (agent) => {
   agent.add('');
 
   agent.context.set({
-    name: 'question-index',
+    name: 'questioning',
     lifespan: 30,
     parameters: {
       questions: [],

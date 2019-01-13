@@ -1,22 +1,52 @@
-const { Suggestion } = require('dialogflow-fulfillment');
+const { Payload } = require('dialogflow-fulfillment');
 
-module.exports = async (agent) => {
-  const { parameters: { questions } } = agent.context.get('question-index');
+const getQuestionRead = question => `
+<speak>
+  <audio src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"/>
+  <break time="0.2s"/>
+  ${question}
+</speak>`;
 
-  // TODO new question generation HERE
-  const question = `question #${Math.floor(Math.random() * 10) + 1}`;
-  // questions.push(question); // JAVASCRIPTOOOO
+// TODO new question generation HERE
+const getQuestionText = questionNumber => `${questionNumber === 1 ? 'Great! Let\'s begin!' : ''} Is it question #${questionNumber}?`;
 
-  agent.add(question);
-  console.log(questions);
-  console.log(` + ${question}`);
+module.exports = (agent) => {
+  const { ACTIONS_ON_GOOGLE } = agent;
+  const { parameters: { questions, questionNumber } } = agent.context.get('questioning');
+
+  const questionText = getQuestionText(questionNumber);
+
+  agent.add(
+    new Payload(ACTIONS_ON_GOOGLE, {
+      expectUserResponse: true,
+      richResponse: {
+        items: [
+          {
+            simpleResponse: {
+              textToSpeech: '',
+              displayText: questionText,
+              ssml: getQuestionRead(questionText),
+            },
+          },
+        ],
+        suggestions: [
+          {
+            title: 'Yes',
+          },
+          {
+            title: 'No',
+          },
+        ],
+      },
+    }),
+  );
 
   agent.context.set({
-    name: 'question-index',
+    name: 'questioning',
     lifespan: 30,
-    parameters: { questions: [...questions, question] },
+    parameters: {
+      questions: [...questions, questionText],
+      questionNumber: questionNumber + 1,
+    },
   });
-
-  agent.add(new Suggestion('yes'));
-  agent.add(new Suggestion('no'));
 };
